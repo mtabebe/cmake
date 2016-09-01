@@ -5,21 +5,17 @@
 #  find_package(PythonInterp REQUIRED)
 #  find_package(Pybind11)
 #
+# Variables used by this module (they can change the default behaviour and need
+# to be set before calling find_package):
+#
+#  PYBIND11_ROOT_DIR  Set this variable either to the pybind11 source directory
+#
 # Variables defined by this module:
 #
 #  PYBIND11_FOUND             Python successfully imports pybind11
 #  PYBIND11_INCLUDE_DIRS      The prefix to the pybind11 headers
 
 if (NOT PYBIND11_FOUND)
-  execute_process(COMMAND "${PYTHON_EXECUTABLE}" -c "import pybind11"
-    RESULT_VARIABLE PYBIND11_IMPORT_RESULT
-    ERROR_QUIET)
-  if (PYBIND11_IMPORT_RESULT)
-    set(PYBIND11_PYTHON_MODULE false) # python returned non-zero exit status
-  else ()
-    set(PYBIND11_PYTHON_MODULE true)
-  endif ()
-
   # Homebrew and Python make it difficult to solely rely on python-config to
   # figure out the exact include path. See http://bit.ly/homebrew-python for
   # details.
@@ -42,9 +38,12 @@ if (NOT PYBIND11_FOUND)
 
   find_path(PYBIND11_INCLUDE_DIRS
     NAMES pybind11/pybind11.h
-    HINTS ${PYTHON_HOMEBREW_INCLUDE_DIRS}
+    HINTS ${PYBIND11_ROOT_DIR}
+          ${PYBIND11_ROOT_DIR}/include
+          ${PYTHON_HOMEBREW_INCLUDE_DIRS}
           ${PYTHON_INCLUDE_DIRS})
 endif ()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Pybind11 DEFAULT_MSG PYBIND11_PYTHON_MODULE)
+find_package_handle_standard_args(Pybind11
+                                  REQUIRED_VARS PYBIND11_INCLUDE_DIRS)
